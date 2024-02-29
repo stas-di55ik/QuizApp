@@ -10,31 +10,67 @@ export default class QuizScreen extends React.Component {
         currentQuestion: 0,
         isLoaded: false,
         questions: [],
-        options: []
+        options: [],
+        correctAnswer: '',
+        score: 0,
     }
 
     componentDidMount() {
         this.fetchQuestion();
     }
 
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+
+        return array;
+    }
+
     async fetchQuestion() {
         return fetch(apiUrl).then(result => {
             result.json().then(resultJson => {
-                // console.log(resultJson);
-
-                const options = resultJson.result[this.state.currentQuestion].incorrect_answers;
-                const correctAnswer = resultJson.result[this.state.currentQuestion].correct_answer;
+                let options = resultJson.results[this.state.currentQuestion].incorrect_answers;
+                const correctAnswer = resultJson.results[this.state.currentQuestion].correct_answer;
                 options.push(correctAnswer);
-
-                console.log(options);
-
+                options = this.shuffleArray(options);
                 this.setState({
                     isLoaded: true,
                     questions: resultJson.results,
-                    options
+                    options,
+                    correctAnswer
                 });
             });
         }).catch(error => console.log(error));
+    }
+
+    checkAnswer(selectedAnswer) {
+        console.log(this.state.correctAnswer);
+        if (this.state.correctAnswer === selectedAnswer) {
+            let score = this.state.score;
+            score += 1;
+            this.setState({ score });
+            console.log('Correct!');
+
+        } else {
+            console.log('Incorrect!');
+        }
+
+        let currentQuestion = this.state.currentQuestion;
+        currentQuestion += 1;
+
+        if (currentQuestion < this.state.questions.length) {
+            let options = this.state.questions[currentQuestion].incorrect_answers;
+            const correctAnswer = this.state.questions[currentQuestion].correct_answer;
+            options.push(correctAnswer);
+            options = this.shuffleArray(options);
+
+            this.setState({ currentQuestion, options, correctAnswer });
+        } else {
+            this.props.navigation.navigate('ResultScreen', { score: this.state.score });
+        }
+
     }
 
     render() {
@@ -56,38 +92,38 @@ export default class QuizScreen extends React.Component {
 
                         <TouchableOpacity
                             onPress={() => {
-
+                                this.checkAnswer(this.state.options[0]);
                             }}
                             style={styles.button}
                         >
-                            <Text style={styles.answerText}>Answer 1</Text>
+                            <Text style={styles.answerText}>{this.state.options[0]}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => {
-
+                                this.checkAnswer(this.state.options[1]);
                             }}
                             style={styles.button}
                         >
-                            <Text style={styles.answerText}>Answer 2</Text>
+                            <Text style={styles.answerText}>{this.state.options[1]}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => {
-
+                                this.checkAnswer(this.state.options[2]);
                             }}
                             style={styles.button}
                         >
-                            <Text style={styles.answerText}>Answer 3</Text>
+                            <Text style={styles.answerText}>{this.state.options[2]}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => {
-
+                                this.checkAnswer(this.state.options[3]);
                             }}
                             style={styles.button}
                         >
-                            <Text style={styles.answerText}>Answer 4</Text>
+                            <Text style={styles.answerText}>{this.state.options[3]}</Text>
                         </TouchableOpacity>
 
                     </View>
