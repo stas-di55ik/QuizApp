@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
     questionContainer: {
         marginHorizontal: 30,
-        marginVertical: 20,
+        marginVertical: 60,
     },
     question: {
         fontSize: 30,
